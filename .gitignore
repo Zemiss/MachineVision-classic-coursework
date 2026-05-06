@@ -1,0 +1,50 @@
+# MATLAB autosave, build, and generated files
+*.asv
+*.m~
+*.autosave
+*.slxc
+*.mex*
+*.mexw*
+*.fig~
+codegen/
+html/
+slprj/
+
+# MATLAB project cache
+*.mlproj/
+*.prj
+
+# Runtime logs and temporary outputs
+*.log
+*.tmp
+tmp/
+temp/
+outputs/
+results/
+
+# Local test inputs created by users
+test_images/
+
+# OS metadata
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor and IDE settings
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python helper environments, if used for inspection only
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+data/
+
+# Keep assignment assets that are required to run or review the project.
+!gesture_model.mat
+
