@@ -1,11 +1,14 @@
 clearvars -except testFolder modelPath; clc;
 
+projectRoot = fileparts(fileparts(mfilename('fullpath')));
+addpath(genpath(fullfile(projectRoot, 'src')));
+
 if ~exist('testFolder', 'var') || isempty(testFolder)
-    testFolder = fullfile(pwd, 'test_images');
+    testFolder = fullfile(projectRoot, 'test_images');
 end
 
 if ~exist('modelPath', 'var') || isempty(modelPath)
-    modelPath = fullfile(pwd, 'gesture_model.mat');
+    modelPath = fullfile(projectRoot, 'models', 'gesture_model.mat');
 end
 
 if ~exist(testFolder, 'dir')

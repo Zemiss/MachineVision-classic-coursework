@@ -1,14 +1,18 @@
 clear; clc;
 
+projectRoot = fileparts(fileparts(mfilename('fullpath')));
+addpath(genpath(fullfile(projectRoot, 'src')));
+
 requiredFiles = {
-    'train.m'
-    'test.m'
+    fullfile('scripts', 'train.m')
+    fullfile('scripts', 'test.m')
+    fullfile('scripts', 'startup_check.m')
     'preprocess_image.m'
     'extract_features.m'
     'normalize_features.m'
     'knn_predict.m'
     'predict_gesture.m'
-    'gesture_model.mat'
+    fullfile('models', 'gesture_model.mat')
 };
 
 fprintf('Checking MATLAB environment...\n');
@@ -22,11 +26,12 @@ assert(exist('padarray', 'file') == 2, ...
 fprintf('Image Processing Toolbox functions: OK\n');
 
 for i = 1:numel(requiredFiles)
-    assert(exist(requiredFiles{i}, 'file') == 2, 'Missing file: %s', requiredFiles{i});
+    assert(exist(fullfile(projectRoot, requiredFiles{i}), 'file') == 2 || ...
+        exist(requiredFiles{i}, 'file') == 2, 'Missing file: %s', requiredFiles{i});
 end
 fprintf('Project files: OK\n');
 
-datasetFolder = fullfile(pwd, 'data', 'Hand_Posture_Easy_Stu');
+datasetFolder = fullfile(projectRoot, 'data', 'Hand_Posture_Easy_Stu');
 classes = {'A', 'C', 'Five', 'V'};
 assert(exist(datasetFolder, 'dir') == 7, 'Dataset folder not found: %s', datasetFolder);
 
@@ -37,7 +42,7 @@ for i = 1:numel(classes)
     fprintf('%s images: %d\n', classes{i}, numel(images));
 end
 
-loaded = load('gesture_model.mat', 'model');
+loaded = load(fullfile(projectRoot, 'models', 'gesture_model.mat'), 'model');
 model = loaded.model;
 assert(isfield(model, 'classes'), 'Model missing classes.');
 assert(isfield(model, 'trainFeatures'), 'Model missing trainFeatures.');

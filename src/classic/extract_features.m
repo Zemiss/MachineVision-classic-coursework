@@ -3,6 +3,16 @@ function feature = extract_features(img)
     gray = data.gray;
     mask = data.mask;
 
+    if any(mask(:))
+        [rows, cols] = find(mask);
+        rowStart = max(min(rows) - 2, 1);
+        rowEnd = min(max(rows) + 2, size(mask, 1));
+        colStart = max(min(cols) - 2, 1);
+        colEnd = min(max(cols) + 2, size(mask, 2));
+        gray = gray(rowStart:rowEnd, colStart:colEnd);
+        mask = mask(rowStart:rowEnd, colStart:colEnd);
+    end
+
     smallGray = imresize(gray, [16, 16]);
     grayFeature = smallGray(:)';
 

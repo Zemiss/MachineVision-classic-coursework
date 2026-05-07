@@ -1,32 +1,59 @@
 # 项目结构说明
 
-本项目是一个小型 MATLAB 传统手势识别项目。为了保持脚本可直接运行，核心 `.m` 文件保留在项目根目录。
+本项目是一个 MATLAB 传统手势识别仓库，核心代码放在 `src/classic/`，运行入口放在 `scripts/`，训练好的模型放在 `models/`。
 
 ## 顶层文件
 
 | 路径 | 说明 |
 | --- | --- |
-| `train.m` | 读取训练数据、提取特征、验证模型并保存 `gesture_model.mat` |
-| `test.m` | 加载模型并批量预测指定目录中的 PNG 图片 |
-| `startup_check.m` | 检查 MATLAB 环境、关键函数、必要文件、数据集和模型字段 |
-| `preprocess_image.m` | 完成灰度化、尺寸归一化、阈值分割和连通区域处理 |
-| `extract_features.m` | 提取灰度、几何和投影特征 |
-| `normalize_features.m` | 计算并应用特征归一化参数 |
-| `knn_predict.m` | 使用 KNN 完成分类 |
-| `predict_gesture.m` | 对单张图片执行完整预测流程 |
-| `gesture_model.mat` | 已训练模型，供测试脚本直接加载 |
+| `README.md` | 项目总说明 |
+| `ENVIRONMENT.md` | 环境与运行说明 |
+| `LICENSE` | 开源许可证 |
+| `.gitignore` | Git 忽略规则 |
+| `models/gesture_model.mat` | 训练好的模型 |
 
-## 目录
+## 代码目录
 
 | 路径 | 说明 |
 | --- | --- |
-| `data/Hand_Posture_Easy_Stu/` | 项目数据集，按类别分为 `A`、`C`、`Five`、`V` |
-| `docs/` | 项目维护、结构和补充说明文档 |
-| `.github/` | Issue 与 Pull Request 模板 |
+| `src/classic/preprocess_image.m` | 图像预处理 |
+| `src/classic/extract_features.m` | 特征提取 |
+| `src/classic/normalize_features.m` | 特征归一化 |
+| `src/classic/knn_predict.m` | KNN 分类 |
+| `src/classic/predict_gesture.m` | 单张图片预测接口 |
 
-## 维护约定
+## 运行脚本
 
-- 算法入口保持为 `train.m` 和 `test.m`。
-- 本项目不使用包管理器，依赖以文档形式写入 `ENVIRONMENT.md`。
-- 本地临时测试图片建议放入 `test_images/`，该目录不会提交到 Git。
-- `gesture_model.mat` 是验收和演示所需文件，默认保留在版本控制中。
+| 路径 | 说明 |
+| --- | --- |
+| `scripts/startup_check.m` | 检查 MATLAB 环境、数据集和模型文件 |
+| `scripts/train.m` | 训练模型并保存到 `models/gesture_model.mat` |
+| `scripts/test.m` | 加载模型并批量识别 PNG 图片 |
+
+## 数据与资源
+
+| 路径 | 说明 |
+| --- | --- |
+| `data/Hand_Posture_Easy_Stu/` | 四类手势数据集 |
+| `data/README.md` | 数据集说明 |
+| `assets/` | 图片、文档配图等静态资源 |
+| `tests/` | 测试相关文件 |
+
+## 运行方式
+
+在 MATLAB 中切换到项目根目录后，运行：
+
+```matlab
+run('scripts/startup_check.m')
+run('scripts/train.m')
+testFolder = 'test_images';
+run('scripts/test.m')
+```
+
+## 约定
+
+- 运行入口统一放在 `scripts/`
+- 核心实现统一放在 `src/classic/`
+- 训练模型统一保存在 `models/gesture_model.mat`
+- 本地测试图片建议放在 `test_images/`
+

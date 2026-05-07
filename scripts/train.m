@@ -1,11 +1,14 @@
 clearvars -except datasetFolder; clc;
 
+projectRoot = fileparts(fileparts(mfilename('fullpath')));
+addpath(genpath(fullfile(projectRoot, 'src')));
+
 if ~exist('datasetFolder', 'var') || isempty(datasetFolder)
-    datasetFolder = fullfile(pwd, 'data', 'Hand_Posture_Easy_Stu');
+    datasetFolder = fullfile(projectRoot, 'data', 'Hand_Posture_Easy_Stu');
 end
 
 classes = {'A', 'C', 'Five', 'V'};
-k = 3;
+k = 4;
 rng(42);
 
 imagePaths = {};
@@ -65,14 +68,18 @@ model.mu = mu;
 model.sigma = sigma;
 model.k = k;
 model.imageSize = [64, 64];
-model.featureDescription = '64x64 grayscale downsample + binary mask geometry + projection features; KNN classifier';
+model.featureDescription = 'Cropped grayscale downsample + binary mask geometry + projection features; KNN classifier';
 model.validationAccuracy = accuracy;
 model.confusionMatrix = confusionMatrix;
 model.validationClasses = classes;
 model.datasetFolder = datasetFolder;
 model.imageNames = imageNames;
 
-save('gesture_model.mat', 'model');
+modelDir = fullfile(projectRoot, 'models');
+if ~exist(modelDir, 'dir')
+    mkdir(modelDir);
+end
+save(fullfile(modelDir, 'gesture_model.mat'), 'model');
 
 fprintf('Training images: %d\n', numel(labels));
 fprintf('Hold-out accuracy: %.2f%%\n', accuracy * 100);
