@@ -22,7 +22,7 @@ end
 loaded = load(modelPath, 'model');
 model = loaded.model;
 
-imageFiles = dir(fullfile(testFolder, '*.png'));
+imageFiles = dir(fullfile(testFolder, '**', '*.png'));
 if isempty(imageFiles)
     error('No PNG images found in %s', testFolder);
 end
@@ -31,5 +31,6 @@ for i = 1:numel(imageFiles)
     imagePath = fullfile(imageFiles(i).folder, imageFiles(i).name);
     img = imread(imagePath);
     label = predict_gesture(img, model);
-    fprintf('%s: %s\n', imageFiles(i).name, label);
+    relPath = erase(imagePath, [testFolder filesep]);
+    fprintf('%s: %s\n', relPath, label);
 end

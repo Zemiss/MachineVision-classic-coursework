@@ -14,11 +14,6 @@
 | `imresize` | 图像尺寸归一化 |
 | `padarray` | 周长和形状相关计算中的边界处理 |
 
-## 不需要的环境
-
-- Deep Learning Toolbox
-- Statistics and Machine Learning Toolbox
-- Python 运行环境
 
 ## 推荐命令
 

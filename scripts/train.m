@@ -9,7 +9,11 @@ end
 
 classes = {'A', 'C', 'Five', 'V'};
 k = 4;
-rng(42);
+numRepeats = 5;
+numFolds = 10;
+rng('shuffle');
+baseSeed = randi(1e9);
+
 
 imagePaths = {};
 labels = {};
@@ -36,30 +40,50 @@ for i = 2:numel(imagePaths)
     features(i, :) = extract_features(imread(imagePaths{i}));
 end
 
-trainIdx = false(numel(labels), 1);
-testIdx = false(numel(labels), 1);
-for c = 1:numel(classes)
-    idx = find(strcmp(labels, classes{c}));
-    idx = idx(randperm(numel(idx)));
-    nTrain = max(1, round(0.8 * numel(idx)));
-    trainIdx(idx(1:nTrain)) = true;
-    testIdx(idx(nTrain + 1:end)) = true;
-end
+labelsCat = categorical(labels, classes);
+template = templateSVM( ...
+    'KernelFunction', 'rbf', ...
+    'KernelScale', 'auto', ...
+    'BoxConstraint', 5, ...
+    'Standardize', false);
 
-[splitTrainFeatures, splitMu, splitSigma] = normalize_features(features(trainIdx, :));
-splitTestFeatures = (features(testIdx, :) - splitMu) ./ splitSigma;
-predicted = knn_predict(splitTestFeatures, splitTrainFeatures, labels(trainIdx), classes, k);
-
-testLabels = labels(testIdx);
-accuracy = mean(strcmp(predicted, testLabels));
+repeatAcc = zeros(numRepeats, 1);
 confusionMatrix = zeros(numel(classes));
-for i = 1:numel(testLabels)
-    actualId = find(strcmp(classes, testLabels{i}));
-    predictedId = find(strcmp(classes, predicted{i}));
-    confusionMatrix(actualId, predictedId) = confusionMatrix(actualId, predictedId) + 1;
+
+for rep = 1:numRepeats
+    rng(baseSeed + rep);
+    cv = cvpartition(labelsCat, 'KFold', numFolds);
+    repeatPredicted = cell(numel(labels), 1);
+
+    for fold = 1:cv.NumTestSets
+        trainMask = training(cv, fold);
+        testMask = test(cv, fold);
+
+        [splitTrainFeatures, splitMu, splitSigma] = normalize_features(features(trainMask, :));
+        splitTestFeatures = (features(testMask, :) - splitMu) ./ splitSigma;
+        foldModel = fitcecoc(splitTrainFeatures, labelsCat(trainMask), ...
+            'Coding', 'onevsall', 'Learners', template);
+
+        foldPredicted = cellstr(string(predict(foldModel, splitTestFeatures)));
+        repeatPredicted(testMask) = foldPredicted;
+    end
+
+    repeatAcc(rep) = mean(strcmp(repeatPredicted, labels));
+
+    if rep == 1
+        for i = 1:numel(labels)
+            actualId = find(strcmp(classes, labels{i}));
+            predictedId = find(strcmp(classes, repeatPredicted{i}));
+            confusionMatrix(actualId, predictedId) = confusionMatrix(actualId, predictedId) + 1;
+        end
+    end
 end
+
+accuracy = mean(repeatAcc);
 
 [trainFeatures, mu, sigma] = normalize_features(features);
+classifier = fitcecoc(trainFeatures, labelsCat, 'Coding', 'onevsall', 'Learners', template);
+
 model = struct();
 model.classes = classes;
 model.trainFeatures = trainFeatures;
@@ -67,13 +91,15 @@ model.trainLabels = labels;
 model.mu = mu;
 model.sigma = sigma;
 model.k = k;
+model.classifier = classifier;
 model.imageSize = [64, 64];
-model.featureDescription = 'Cropped grayscale downsample + binary mask geometry + projection features; KNN classifier';
+model.featureDescription = 'Square-padded grayscale HOG + binary mask HOG + geometry features; RBF SVM ECOC classifier';
 model.validationAccuracy = accuracy;
 model.confusionMatrix = confusionMatrix;
 model.validationClasses = classes;
 model.datasetFolder = datasetFolder;
 model.imageNames = imageNames;
+model.validationProtocol = sprintf('%d-repeat %d-fold cross-validation', numRepeats, numFolds);
 
 modelDir = fullfile(projectRoot, 'models');
 if ~exist(modelDir, 'dir')
@@ -82,6 +108,6 @@ end
 save(fullfile(modelDir, 'gesture_model.mat'), 'model');
 
 fprintf('Training images: %d\n', numel(labels));
-fprintf('Hold-out accuracy: %.2f%%\n', accuracy * 100);
+fprintf('Validation accuracy (mean %s): %.2f%%\n', model.validationProtocol, accuracy * 100);
 fprintf('Confusion matrix rows=actual, columns=predicted:\n');
 disp(array2table(confusionMatrix, 'VariableNames', classes, 'RowNames', classes));

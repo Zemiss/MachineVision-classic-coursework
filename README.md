@@ -1,4 +1,4 @@
-# # 机器视觉原理课程作业：传统手势识别
+# 机器视觉原理课程作业：传统手势识别
 
 [![MATLAB](https://img.shields.io/badge/MATLAB-R2020b%2B-orange)](https://www.mathworks.com/products/matlab.html)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -21,11 +21,8 @@ classic/
 ├── src/classic/                  # 核心实现
 ├── scripts/                      # 可直接运行的脚本
 ├── docs/                         # 结构说明和项目文档
-├── assets/                       # 静态资源
-├── tests/                        # 测试相关文件
 ├── README.md
 ├── ENVIRONMENT.md
-├── requirements.md
 └── LICENSE
 ```
 
@@ -127,7 +124,7 @@ run('scripts/test.m')
 当前模型记录的验证准确率为：
 
 ```text
-82.50%
+95.00%
 ```
 
 混淆矩阵如下：
@@ -144,4 +141,3 @@ run('scripts/test.m')
 - 根目录下不再保留 `train.m`、`test.m`、`startup_check.m`，统一使用 `scripts/` 目录下的入口脚本。
 - 如果你只想直接测试现成模型，运行 `scripts/test.m` 即可。
 - 如果你修改了特征提取或分类参数，建议先运行 `scripts/train.m` 重新生成模型。
-

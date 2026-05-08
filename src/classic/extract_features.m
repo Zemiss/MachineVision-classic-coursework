@@ -13,8 +13,14 @@ function feature = extract_features(img)
         mask = mask(rowStart:rowEnd, colStart:colEnd);
     end
 
-    smallGray = imresize(gray, [16, 16]);
-    grayFeature = smallGray(:)';
+    gray = pad_to_square(gray, mean(gray(:)));
+    mask = pad_to_square(double(mask), 0) > 0.5;
+
+    gray64 = imresize(gray, [64, 64]);
+    mask64 = imresize(double(mask), [64, 64]) > 0.5;
+
+    hogGray = extractHOGFeatures(gray64, 'CellSize', [16, 16]);
+    hogMask = extractHOGFeatures(double(mask64), 'CellSize', [16, 16]);
 
     [rows, cols] = find(mask);
     if isempty(rows)
@@ -31,12 +37,7 @@ function feature = extract_features(img)
         geometry = [area, width, height, aspect, centroidRow, centroidCol, perimeter, compactness];
     end
 
-    rowProjection = sum(mask, 2)' / size(mask, 2);
-    colProjection = sum(mask, 1) / size(mask, 1);
-    rowProjection = imresize(rowProjection, [1, 16]);
-    colProjection = imresize(colProjection, [1, 16]);
-
-    feature = double([grayFeature, geometry, rowProjection, colProjection]);
+    feature = double([hogGray, hogMask, geometry]);
 end
 
 function perimeter = estimate_perimeter(mask)
@@ -48,4 +49,17 @@ function perimeter = estimate_perimeter(mask)
     right = padded(2:end-1, 3:end);
     edge = center & (~up | ~down | ~left | ~right);
     perimeter = sum(edge(:));
+end
+
+function square = pad_to_square(img, fillValue)
+    [h, w] = size(img);
+    side = max(h, w);
+
+    padTop = floor((side - h) / 2);
+    padBottom = side - h - padTop;
+    padLeft = floor((side - w) / 2);
+    padRight = side - w - padLeft;
+
+    square = padarray(img, [padTop, padLeft], fillValue, 'pre');
+    square = padarray(square, [padBottom, padRight], fillValue, 'post');
 end

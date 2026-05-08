@@ -49,6 +49,7 @@ assert(isfield(model, 'trainFeatures'), 'Model missing trainFeatures.');
 assert(isfield(model, 'trainLabels'), 'Model missing trainLabels.');
 assert(isfield(model, 'mu'), 'Model missing mu.');
 assert(isfield(model, 'sigma'), 'Model missing sigma.');
+assert(isfield(model, 'classifier'), 'Model missing classifier.');
 
 fprintf('Model file: OK\n');
 fprintf('Validation accuracy in model: %.2f%%\n', model.validationAccuracy * 100);
