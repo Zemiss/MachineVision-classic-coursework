@@ -22,9 +22,6 @@ temp/
 outputs/
 results/
 
-# Local test inputs created by users
-test_images/
-
 # OS metadata
 .DS_Store
 Thumbs.db

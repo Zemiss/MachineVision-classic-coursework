@@ -22,8 +22,14 @@ assert(exist('imresize', 'file') == 2, ...
     'Missing imresize. Please install Image Processing Toolbox.');
 assert(exist('padarray', 'file') == 2, ...
     'Missing padarray. Please install Image Processing Toolbox.');
+assert(exist('extractHOGFeatures', 'file') == 2, ...
+    'Missing extractHOGFeatures. Please install Computer Vision Toolbox.');
+assert(exist('templateSVM', 'file') == 2, ...
+    'Missing templateSVM. Please install Statistics and Machine Learning Toolbox.');
+assert(exist('fitcecoc', 'file') == 2, ...
+    'Missing fitcecoc. Please install Statistics and Machine Learning Toolbox.');
 
-fprintf('Image Processing Toolbox functions: OK\n');
+fprintf('Required toolbox functions: OK\n');
 
 for i = 1:numel(requiredFiles)
     assert(exist(fullfile(projectRoot, requiredFiles{i}), 'file') == 2 || ...
@@ -39,6 +45,9 @@ for i = 1:numel(classes)
     classFolder = fullfile(datasetFolder, classes{i});
     images = dir(fullfile(classFolder, '*.png'));
     assert(numel(images) > 0, 'No PNG images found in %s', classFolder);
+    if i == 1
+        sampleImagePath = fullfile(images(1).folder, images(1).name);
+    end
     fprintf('%s images: %d\n', classes{i}, numel(images));
 end
 
@@ -50,6 +59,9 @@ assert(isfield(model, 'trainLabels'), 'Model missing trainLabels.');
 assert(isfield(model, 'mu'), 'Model missing mu.');
 assert(isfield(model, 'sigma'), 'Model missing sigma.');
 assert(isfield(model, 'classifier'), 'Model missing classifier.');
+feature = extract_features(imread(sampleImagePath));
+assert(numel(model.mu) == numel(feature), ...
+    'Model feature dimension does not match extract_features output. Re-run scripts/train.m.');
 
 fprintf('Model file: OK\n');
 fprintf('Validation accuracy in model: %.2f%%\n', model.validationAccuracy * 100);

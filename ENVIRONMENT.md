@@ -6,6 +6,8 @@
 
 - MATLAB R2020b 或更高版本
 - Image Processing Toolbox
+- Computer Vision Toolbox
+- Statistics and Machine Learning Toolbox
 
 ## 用到的工具箱函数
 
@@ -13,6 +15,10 @@
 | --- | --- |
 | `imresize` | 图像尺寸归一化 |
 | `padarray` | 周长和形状相关计算中的边界处理 |
+| `extractHOGFeatures` | 提取 HOG 手工特征 |
+| `templateSVM` | 配置 RBF SVM 二分类学习器 |
+| `fitcecoc` | 训练 ECOC 多分类模型 |
+| `predict` | 使用训练好的分类模型预测类别 |
 
 
 ## 推荐命令
@@ -26,7 +32,7 @@ run('scripts/startup_check.m')
 通过检查后，说明以下内容可用：
 
 - MATLAB 版本
-- Image Processing Toolbox 关键函数
+- 必需工具箱关键函数
 - 项目必须文件
 - 数据集目录
 - `models/gesture_model.mat` 模型文件
@@ -42,9 +48,7 @@ run('scripts/train.m')
 批量测试：
 
 ```matlab
-testFolder = 'test_images';
 run('scripts/test.m')
 ```
 
-如果没有 `test_images` 目录，`scripts/test.m` 会提示输入测试图片文件夹路径。
-
+`scripts/test.m` 会自动读取项目根目录 `test_images/` 下的所有 PNG 图片，并自动加载 `models/gesture_model.mat`。

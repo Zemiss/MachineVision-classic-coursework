@@ -21,6 +21,8 @@ function feature = extract_features(img)
 
     hogGray = extractHOGFeatures(gray64, 'CellSize', [16, 16]);
     hogMask = extractHOGFeatures(double(mask64), 'CellSize', [16, 16]);
+    lbpGray = extract_lbp_grid_histogram(gray64, 4, 4, 16);
+    lbpMask = extract_lbp_grid_histogram(double(mask64), 4, 4, 16);
 
     [rows, cols] = find(mask);
     if isempty(rows)
@@ -37,7 +39,55 @@ function feature = extract_features(img)
         geometry = [area, width, height, aspect, centroidRow, centroidCol, perimeter, compactness];
     end
 
-    feature = double([hogGray, hogMask, geometry]);
+    feature = double([hogGray, hogMask, lbpGray, lbpMask, geometry]);
+end
+
+function feature = extract_lbp_grid_histogram(img, gridRows, gridCols, numBins)
+    img = double(img);
+    if max(img(:)) > 1
+        img = img / 255;
+    end
+
+    padded = padarray(img, [1, 1], 'replicate');
+    center = padded(2:end-1, 2:end-1);
+    codes = zeros(size(img));
+
+    offsets = [
+        -1, -1
+        -1,  0
+        -1,  1
+         0,  1
+         1,  1
+         1,  0
+         1, -1
+         0, -1
+    ];
+
+    for k = 1:size(offsets, 1)
+        neighbor = padded(2 + offsets(k, 1):end-1 + offsets(k, 1), ...
+                          2 + offsets(k, 2):end-1 + offsets(k, 2));
+        codes = codes + double(neighbor >= center) * 2^(k - 1);
+    end
+
+    binIds = min(floor(codes / (256 / numBins)) + 1, numBins);
+    rowEdges = round(linspace(1, size(img, 1) + 1, gridRows + 1));
+    colEdges = round(linspace(1, size(img, 2) + 1, gridCols + 1));
+    feature = zeros(1, gridRows * gridCols * numBins);
+    pos = 1;
+
+    for r = 1:gridRows
+        for c = 1:gridCols
+            cellBins = binIds(rowEdges(r):rowEdges(r + 1) - 1, ...
+                              colEdges(c):colEdges(c + 1) - 1);
+            histValues = zeros(1, numBins);
+            for b = 1:numBins
+                histValues(b) = sum(cellBins(:) == b);
+            end
+            histValues = histValues / max(sum(histValues), eps);
+            feature(pos:pos + numBins - 1) = histValues;
+            pos = pos + numBins;
+        end
+    end
 end
 
 function perimeter = estimate_perimeter(mask)

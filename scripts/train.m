@@ -11,8 +11,7 @@ classes = {'A', 'C', 'Five', 'V'};
 k = 4;
 numRepeats = 5;
 numFolds = 10;
-rng('shuffle');
-baseSeed = randi(1e9);
+baseSeed = 42;
 
 
 imagePaths = {};
@@ -93,7 +92,8 @@ model.sigma = sigma;
 model.k = k;
 model.classifier = classifier;
 model.imageSize = [64, 64];
-model.featureDescription = 'Square-padded grayscale HOG + binary mask HOG + geometry features; RBF SVM ECOC classifier';
+model.featureDescription = 'Square-padded grayscale HOG + binary mask HOG + 4x4 LBP grid histograms + geometry features; RBF SVM ECOC classifier';
+model.featureLength = size(trainFeatures, 2);
 model.validationAccuracy = accuracy;
 model.confusionMatrix = confusionMatrix;
 model.validationClasses = classes;

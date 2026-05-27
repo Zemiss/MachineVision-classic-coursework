@@ -1,18 +1,13 @@
-clearvars -except testFolder modelPath; clc;
+clc;
 
 projectRoot = fileparts(fileparts(mfilename('fullpath')));
 addpath(genpath(fullfile(projectRoot, 'src')));
 
-if ~exist('testFolder', 'var') || isempty(testFolder)
-    testFolder = fullfile(projectRoot, 'test_images');
-end
-
-if ~exist('modelPath', 'var') || isempty(modelPath)
-    modelPath = fullfile(projectRoot, 'models', 'gesture_model.mat');
-end
+testFolder = fullfile(projectRoot, 'test_images');
+modelPath = fullfile(projectRoot, 'models', 'gesture_model.mat');
 
 if ~exist(testFolder, 'dir')
-    testFolder = input('Input test image folder path: ', 's');
+    error('Test image folder not found: %s', testFolder);
 end
 
 if ~exist(modelPath, 'file')
