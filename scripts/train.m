@@ -47,7 +47,7 @@ template = templateSVM( ...
     'Standardize', false);
 
 repeatAcc = zeros(numRepeats, 1);
-confusionMatrix = zeros(numel(classes));
+confusionMatrix = zeros(numel(classes), numel(classes));
 
 for rep = 1:numRepeats
     rng(baseSeed + rep);

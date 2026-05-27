@@ -33,7 +33,7 @@ classic/
 
 - `scripts/startup_check.m`：检查 MATLAB 环境、数据集和模型文件是否齐全
 - `scripts/train.m`：重新训练模型并保存到 `models/gesture_model.mat`
-- `scripts/test.m`：单独的测试代码，默认加载 `models/gesture_model.mat` 并批量识别 PNG 图片
+- `scripts/evaluate.m`：单独的测试代码，默认加载 `models/gesture_model.mat` 并批量识别 PNG 图片
 
 ## 快速开始
 
@@ -53,7 +53,7 @@ run('scripts/train.m')
 4. 批量测试图片：
 
 ```matlab
-run('scripts/test.m')
+run('scripts/evaluate.m')
 ```
 
 测试脚本会自动读取项目根目录 `test_images/` 下的所有 PNG 图片，并自动加载 `models/gesture_model.mat`。
@@ -72,7 +72,7 @@ run('scripts/test.m')
 
 测试脚本只加载模型，不会重新训练。测试相关文件位置如下：
 
-- 单独的测试代码：`scripts/test.m`
+- 单独的测试代码：`scripts/evaluate.m`
 - 测试代码默认加载的训练好分类模型：`models/gesture_model.mat`
 
 如需测试其他模型，请先替换或重新生成 `models/gesture_model.mat`。
@@ -146,5 +146,5 @@ run('scripts/test.m')
 ## 说明
 
 - 根目录下不再保留 `train.m`、`test.m`、`startup_check.m`，统一使用 `scripts/` 目录下的入口脚本。
-- 如果你只想直接测试现成模型，运行 `scripts/test.m` 即可。
+- 如果你只想直接测试现成模型，运行 `scripts/evaluate.m` 即可。
 - 如果你修改了特征提取或分类参数，建议先运行 `scripts/train.m` 重新生成模型。

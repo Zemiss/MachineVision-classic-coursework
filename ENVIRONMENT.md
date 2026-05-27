@@ -48,7 +48,7 @@ run('scripts/train.m')
 批量测试：
 
 ```matlab
-run('scripts/test.m')
+run('scripts/evaluate.m')
 ```
 
-`scripts/test.m` 会自动读取项目根目录 `test_images/` 下的所有 PNG 图片，并自动加载 `models/gesture_model.mat`。
+`scripts/evaluate.m` 会自动读取项目根目录 `test_images/` 下的所有 PNG 图片，并自动加载 `models/gesture_model.mat`。

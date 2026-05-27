@@ -5,7 +5,7 @@ addpath(genpath(fullfile(projectRoot, 'src')));
 
 requiredFiles = {
     fullfile('scripts', 'train.m')
-    fullfile('scripts', 'test.m')
+    fullfile('scripts', 'evaluate.m')
     fullfile('scripts', 'startup_check.m')
     'preprocess_image.m'
     'extract_features.m'
