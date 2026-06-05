@@ -2,10 +2,9 @@ function train(varargin)
 clc;
 
 scriptDir = fileparts(mfilename('fullpath'));
-projectRoot = fileparts(scriptDir);
 addpath(genpath(fullfile(scriptDir, 'src')));
 
-paths = load_project_config(projectRoot);
+paths = load_project_config(scriptDir);
 [datasetFolder, modelPath] = parse_train_args(varargin, paths.dataFolder, paths.modelPath);
 
 classes = {'A', 'C', 'Five', 'V'};
@@ -149,9 +148,9 @@ function [datasetFolder, modelPath] = parse_train_args(args, defaultData, defaul
     end
 end
 
-function paths = load_project_config(projectRoot)
+function paths = load_project_config(mainDir)
     % Load project paths from YAML config file
-    configFile = fullfile(projectRoot, 'main', 'configs', 'default.yaml');
+    configFile = fullfile(mainDir, 'configs', 'default.yaml');
 
     if ~exist(configFile, 'file')
         error('Config file not found: %s', configFile);
@@ -167,7 +166,7 @@ function paths = load_project_config(projectRoot)
     % Parse data_folder
     match = regexp(content, 'data_folder:\s*"([^"]+)"', 'tokens');
     if ~isempty(match)
-        paths.dataFolder = fullfile(projectRoot, match{1}{1});
+        paths.dataFolder = fullfile(mainDir, match{1}{1});
     else
         error('Failed to parse data_folder from config');
     end
@@ -175,7 +174,7 @@ function paths = load_project_config(projectRoot)
     % Parse test_folder
     match = regexp(content, 'test_folder:\s*"([^"]+)"', 'tokens');
     if ~isempty(match)
-        paths.testFolder = fullfile(projectRoot, match{1}{1});
+        paths.testFolder = fullfile(mainDir, match{1}{1});
     else
         error('Failed to parse test_folder from config');
     end
@@ -183,7 +182,7 @@ function paths = load_project_config(projectRoot)
     % Parse model_path
     match = regexp(content, 'model_path:\s*"([^"]+)"', 'tokens');
     if ~isempty(match)
-        paths.modelPath = fullfile(projectRoot, match{1}{1});
+        paths.modelPath = fullfile(mainDir, match{1}{1});
     else
         error('Failed to parse model_path from config');
     end
