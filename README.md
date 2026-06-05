@@ -19,7 +19,7 @@
 classic/
 ├── data/Hand_Posture_Easy_Stu/   # 四类手势数据集
 ├── models/gesture_model.mat      # 已训练模型
-├── src/classic/                  # 核心实现
+├── src/                          # 核心实现
 ├── scripts/                      # 可直接运行的脚本
 ├── docs/                         # 结构说明和项目文档
 ├── README.md
@@ -148,3 +148,34 @@ run('scripts/evaluate.m')
 - 根目录下不再保留 `train.m`、`test.m`、`startup_check.m`，统一使用 `scripts/` 目录下的入口脚本。
 - 如果你只想直接测试现成模型，运行 `scripts/evaluate.m` 即可。
 - 如果你修改了特征提取或分类参数，建议先运行 `scripts/train.m` 重新生成模型。
+## MATLAB command usage
+
+The current entry files are in `main/`. Add `main/` to the MATLAB path before calling them from the project root:
+
+```matlab
+addpath('main')
+```
+
+Train with default paths:
+
+```matlab
+train
+```
+
+Train with custom input and output paths:
+
+```matlab
+train('-data', 'C:/path/to/train_data', '-out', 'C:/path/to/gesture_model.mat')
+```
+
+Test with default paths:
+
+```matlab
+test
+```
+
+Test with custom image and model paths:
+
+```matlab
+test('-test', 'C:/path/to/test_images', '-model', 'C:/path/to/gesture_model.mat')
+```
