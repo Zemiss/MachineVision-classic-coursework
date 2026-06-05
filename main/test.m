@@ -5,9 +5,8 @@ scriptDir = fileparts(mfilename('fullpath'));
 projectRoot = fileparts(scriptDir);
 addpath(genpath(fullfile(scriptDir, 'src')));
 
-defaultTest = fullfile(projectRoot, 'test_images');
-defaultModel = fullfile(scriptDir, 'models', 'gesture_model.mat');
-[testFolder, modelPath] = parse_test_args(varargin, defaultTest, defaultModel);
+paths = load_project_config(projectRoot);
+[testFolder, modelPath] = parse_test_args(varargin, paths.testFolder, paths.modelPath);
 
 if ~exist(testFolder, 'dir')
     error('Test image folder not found: %s', testFolder);
@@ -54,5 +53,45 @@ function [testFolder, modelPath] = parse_test_args(args, defaultTest, defaultMod
             otherwise
                 error('Unknown argument: %s. Supported arguments: -test, -model', name);
         end
+    end
+end
+
+function paths = load_project_config(projectRoot)
+    % Load project paths from YAML config file
+    configFile = fullfile(projectRoot, 'main', 'configs', 'default.yaml');
+
+    if ~exist(configFile, 'file')
+        error('Config file not found: %s', configFile);
+    end
+
+    % Simple YAML parser for project_config.yaml
+    fid = fopen(configFile, 'r');
+    content = fread(fid, '*char')';
+    fclose(fid);
+
+    paths = struct();
+
+    % Parse data_folder
+    match = regexp(content, 'data_folder:\s*"([^"]+)"', 'tokens');
+    if ~isempty(match)
+        paths.dataFolder = fullfile(projectRoot, match{1}{1});
+    else
+        error('Failed to parse data_folder from config');
+    end
+
+    % Parse test_folder
+    match = regexp(content, 'test_folder:\s*"([^"]+)"', 'tokens');
+    if ~isempty(match)
+        paths.testFolder = fullfile(projectRoot, match{1}{1});
+    else
+        error('Failed to parse test_folder from config');
+    end
+
+    % Parse model_path
+    match = regexp(content, 'model_path:\s*"([^"]+)"', 'tokens');
+    if ~isempty(match)
+        paths.modelPath = fullfile(projectRoot, match{1}{1});
+    else
+        error('Failed to parse model_path from config');
     end
 end

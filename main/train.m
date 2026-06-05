@@ -5,9 +5,8 @@ scriptDir = fileparts(mfilename('fullpath'));
 projectRoot = fileparts(scriptDir);
 addpath(genpath(fullfile(scriptDir, 'src')));
 
-defaultData = fullfile(projectRoot, 'data', 'Hand_Posture_Easy_Stu');
-defaultOutput = fullfile(scriptDir, 'models', 'gesture_model.mat');
-[datasetFolder, modelPath] = parse_train_args(varargin, defaultData, defaultOutput);
+paths = load_project_config(projectRoot);
+[datasetFolder, modelPath] = parse_train_args(varargin, paths.dataFolder, paths.modelPath);
 
 classes = {'A', 'C', 'Five', 'V'};
 k = 4;
@@ -16,17 +15,28 @@ numFolds = 10;
 baseSeed = 42;
 
 
-imagePaths = {};
-labels = {};
-imageNames = {};
+classImageFiles = cell(numel(classes), 1);
+numImages = 0;
 
 for c = 1:numel(classes)
     className = classes{c};
-    imageFiles = dir(fullfile(datasetFolder, className, '*.png'));
+    classImageFiles{c} = dir(fullfile(datasetFolder, className, '*.png'));
+    numImages = numImages + numel(classImageFiles{c});
+end
+
+imagePaths = cell(numImages, 1);
+labels = cell(numImages, 1);
+imageNames = cell(numImages, 1);
+row = 1;
+
+for c = 1:numel(classes)
+    className = classes{c};
+    imageFiles = classImageFiles{c};
     for i = 1:numel(imageFiles)
-        imagePaths{end + 1, 1} = fullfile(imageFiles(i).folder, imageFiles(i).name); %#ok<SAGROW>
-        labels{end + 1, 1} = className; %#ok<SAGROW>
-        imageNames{end + 1, 1} = imageFiles(i).name; %#ok<SAGROW>
+        imagePaths{row} = fullfile(imageFiles(i).folder, imageFiles(i).name);
+        labels{row} = className;
+        imageNames{row} = imageFiles(i).name;
+        row = row + 1;
     end
 end
 
@@ -136,5 +146,45 @@ function [datasetFolder, modelPath] = parse_train_args(args, defaultData, defaul
             otherwise
                 error('Unknown argument: %s. Supported arguments: -data, -out', name);
         end
+    end
+end
+
+function paths = load_project_config(projectRoot)
+    % Load project paths from YAML config file
+    configFile = fullfile(projectRoot, 'main', 'configs', 'default.yaml');
+
+    if ~exist(configFile, 'file')
+        error('Config file not found: %s', configFile);
+    end
+
+    % Simple YAML parser for project_config.yaml
+    fid = fopen(configFile, 'r');
+    content = fread(fid, '*char')';
+    fclose(fid);
+
+    paths = struct();
+
+    % Parse data_folder
+    match = regexp(content, 'data_folder:\s*"([^"]+)"', 'tokens');
+    if ~isempty(match)
+        paths.dataFolder = fullfile(projectRoot, match{1}{1});
+    else
+        error('Failed to parse data_folder from config');
+    end
+
+    % Parse test_folder
+    match = regexp(content, 'test_folder:\s*"([^"]+)"', 'tokens');
+    if ~isempty(match)
+        paths.testFolder = fullfile(projectRoot, match{1}{1});
+    else
+        error('Failed to parse test_folder from config');
+    end
+
+    % Parse model_path
+    match = regexp(content, 'model_path:\s*"([^"]+)"', 'tokens');
+    if ~isempty(match)
+        paths.modelPath = fullfile(projectRoot, match{1}{1});
+    else
+        error('Failed to parse model_path from config');
     end
 end

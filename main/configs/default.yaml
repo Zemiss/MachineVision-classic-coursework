@@ -1,0 +1,4 @@
+paths:
+  data_folder: "data/Hand_Posture_Easy_Stu"
+  test_folder: "data/Hand_Posture_Easy_Stu"
+  model_path: "main/models/gesture_model.mat"

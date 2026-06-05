@@ -156,6 +156,8 @@ The current entry files are in `main/`. Add `main/` to the MATLAB path before ca
 addpath('main')
 ```
 
+Default paths are centralized in `main/configs/project_config.yaml`. If you change the paths there, `train` and `test` will automatically use the new defaults on next run.
+
 Train with default paths:
 
 ```matlab
