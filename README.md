@@ -150,13 +150,13 @@ run('scripts/evaluate.m')
 - 如果你修改了特征提取或分类参数，建议先运行 `scripts/train.m` 重新生成模型。
 ## MATLAB command usage
 
-The current entry files are in `main/`. Add `main/` to the MATLAB path before calling them from the project root:
+The current entry files are in the project root. Open MATLAB in the project root before calling them:
 
 ```matlab
-addpath('main')
+cd('C:/path/to/project')
 ```
 
-Default paths are centralized in `main/configs/project_config.yaml`. If you change the paths there, `train` and `test` will automatically use the new defaults on next run.
+Default paths are centralized in `configs/default.yaml`. If you change the paths there, `train` and `test` will automatically use the new defaults on next run.
 
 Train with default paths:
 
