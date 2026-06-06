@@ -1,183 +1,150 @@
-# 机器视觉原理课程作业：传统手势识别
+# 机器视觉原理课程作业：HandSignC
 
 [![MATLAB](https://img.shields.io/badge/MATLAB-R2020b%2B-orange)](https://www.mathworks.com/products/matlab.html)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-本项目使用传统机器视觉方法识别四类手势：`A`、`C`、`Five`、`V`。项目包含预处理、特征提取、SVM/ECOC 分类器、训练脚本、测试脚本以及已经训练好的模型文件，不依赖深度学习框架。
+> 本项目使用传统机器视觉方法识别四类手势：`A`、`C`、`Five`、`V`。项目包含预处理、特征提取、SVM/ECOC 分类器、训练脚本、测试脚本以及已经训练好的模型文件，不依赖深度学习框架。
 
-## 项目内容
+## 目录
 
-- 基于灰度化、尺寸归一化、Otsu 阈值分割、连通域提取等传统图像处理流程
-- 基于 HOG、LBP 和几何特征融合的人工特征方案
-- 基于 RBF SVM 和 ECOC 的多分类方案
-- 已训练模型文件 `models/gesture_model.mat`
-- MATLAB 启动检查、训练、测试脚本
+- [机器视觉原理课程作业：HandSignC](#机器视觉原理课程作业handsignc)
+  - [目录](#目录)
+  - [项目结构](#项目结构)
+  - [环境配置](#环境配置)
+  - [系统配置](#系统配置)
+  - [模型结构](#模型结构)
+  - [训练配置](#训练配置)
+  - [输出文件](#输出文件)
+  - [训练](#训练)
+  - [测试](#测试)
+  - [实验结果](#实验结果)
 
-## 目录结构
+## 项目结构
 
 ```text
-classic/
+.
+├── configs/default.yaml          # 数据集、测试集和模型路径配置
 ├── data/Hand_Posture_Easy_Stu/   # 四类手势数据集
 ├── models/gesture_model.mat      # 已训练模型
-├── src/                          # 核心实现
-├── scripts/                      # 可直接运行的脚本
-├── docs/                         # 结构说明和项目文档
+├── src/                          # 特征提取、归一化和预测函数
+├── train.m                       # 训练入口
+├── test.m                        # 测试入口
+├── repoet.md                     # 实验报告
 ├── README.md
-├── ENVIRONMENT.md
 └── LICENSE
 ```
 
-## 主要脚本
+## 环境配置
 
-这些脚本都在 `scripts/` 目录下：
+建议使用 MATLAB R2020b 或更高版本运行本项目。代码中使用了 `imread`、`imresize`、`padarray`、`extractHOGFeatures`、`fitcecoc`、`templateSVM`、`cvpartition` 等函数，因此需要安装：
 
-- `scripts/startup_check.m`：检查 MATLAB 环境、数据集和模型文件是否齐全
-- `scripts/train.m`：重新训练模型并保存到 `models/gesture_model.mat`
-- `scripts/evaluate.m`：单独的测试代码，默认加载 `models/gesture_model.mat` 并批量识别 PNG 图片
-
-## 快速开始
-
-1. 在 MATLAB 中切换到项目根目录。
-2. 运行环境检查：
-
-```matlab
-run('scripts/startup_check.m')
-```
-
-3. 如需重新训练模型：
-
-```matlab
-run('scripts/train.m')
-```
-
-4. 批量测试图片：
-
-```matlab
-run('scripts/evaluate.m')
-```
-
-测试脚本会自动读取项目根目录 `test_images/` 下的所有 PNG 图片，并自动加载 `models/gesture_model.mat`。
-
-## 模型文件
-
-训练完成后，模型会保存为 `models/gesture_model.mat`。该文件中主要包含：
-
-- `model.classes`
-- `model.trainFeatures`
-- `model.trainLabels`
-- `model.mu`
-- `model.sigma`
-- `model.validationAccuracy`
-- `model.confusionMatrix`
-
-测试脚本只加载模型，不会重新训练。测试相关文件位置如下：
-
-- 单独的测试代码：`scripts/evaluate.m`
-- 测试代码默认加载的训练好分类模型：`models/gesture_model.mat`
-
-如需测试其他模型，请先替换或重新生成 `models/gesture_model.mat`。
-
-## 环境要求
-
-必需环境：
-
-- MATLAB R2020b 或更高版本
 - Image Processing Toolbox
 - Computer Vision Toolbox
 - Statistics and Machine Learning Toolbox
 
-不需要：
+运行前在 MATLAB 中切换到项目根目录，或将项目根目录加入当前工作路径。训练和测试脚本会自动把 `src/` 加入 MATLAB 搜索路径。
 
-- Deep Learning Toolbox
-- Python 运行环境
+## 系统配置
 
-更详细的环境说明见 [ENVIRONMENT.md](ENVIRONMENT.md)。
+默认路径写在 `configs/default.yaml` 中：
 
-## 算法流程
-
-```text
-读取图像
-  -> 灰度化和尺寸归一化
-  -> Otsu 阈值分割
-  -> 最大连通区域提取
-  -> HOG、LBP 和几何特征提取
-  -> 特征归一化
-  -> RBF SVM/ECOC 分类
-  -> 输出类别
+```yaml
+paths:
+  data_folder: "data/Hand_Posture_Easy_Stu"
+  test_folder: "data/Hand_Posture_Easy_Stu"
+  model_path: "models/gesture_model.mat"
 ```
 
-## 特征设计
+其中 `data_folder` 是训练数据集目录，`test_folder` 是测试图片目录，`model_path` 是模型保存和加载路径。默认测试目录指向同一份数据集；如果需要测试自己的图片，可以修改 `test_folder`，或在运行 `test.m` 时通过参数指定。
 
-`extract_features.m` 输出 1168 维特征，主要由以下部分组成：
+## 模型结构
 
-| 特征类型 | 维度 | 说明 |
-| --- | ---: | --- |
-| 灰度 HOG | 324 | 在 `64x64` 灰度图上提取梯度方向直方图 |
-| 二值掩膜 HOG | 324 | 在最大连通手势区域的二值掩膜上提取形状梯度 |
-| 灰度 LBP 网格直方图 | 256 | 将 `64x64` 灰度图分成 `4x4` 网格，每格统计 16 bin LBP |
-| 二值掩膜 LBP 网格直方图 | 256 | 在二值掩膜上统计局部纹理和边界模式 |
-| 几何特征 | 8 | 面积、宽度、高度、宽高比、质心、周长、紧致度等 |
+项目采用“传统特征 + 机器学习分类器”的流程：
 
-训练阶段会保存均值和标准差，测试阶段使用同一组参数做归一化。
+1. 图像预处理：灰度化、像素归一化、缩放到 `64x64`、Otsu 阈值分割、保留最大连通区域。
+2. 特征提取：从灰度图和二值掩膜中提取 HOG 特征、`4x4` 网格 LBP 直方图特征，并加入面积、宽高比、质心、周长、紧致度等几何特征。
+3. 特征归一化：使用训练集均值和标准差进行标准化，标准差过小的维度按 1 处理。
+4. 分类器：使用 RBF 核 SVM 作为基础分类器，并通过 ECOC 的 one-vs-all 策略完成四分类。
 
-## 模型说明
+最终每张图片会被表示为一个人工特征向量，再输入分类器预测为 `A`、`C`、`Five` 或 `V`。
 
-分类器使用 RBF SVM，并通过 ECOC 处理四分类任务。`models/gesture_model.mat` 中保存了训练好的模型及验证结果。`predict_gesture.m` 仍保留 KNN 兜底逻辑，用于兼容旧模型。
+## 训练配置
 
-## 当前结果
+训练脚本默认使用以下设置：
 
-数据集共 200 张图片，每类 50 张。训练时使用固定随机种子 `42`，采用 5 次重复 10 折交叉验证。
+- 类别：`A`、`C`、`Five`、`V`
+- 验证方式：5 次重复 10 折交叉验证
+- 随机种子：以 `42` 为基础种子
+- 分类器：RBF 核 SVM，`BoxConstraint = 5`
+- 多分类策略：ECOC one-vs-all
+- 模型输出：`models/gesture_model.mat`
 
-当前模型记录的验证准确率为：
+训练数据需要按类别分别放在 `data/Hand_Posture_Easy_Stu/A`、`C`、`Five`、`V` 四个子目录中，图片格式为 PNG。
+
+## 输出文件
+
+训练完成后会生成或覆盖：
+
+```text
+models/gesture_model.mat
+```
+
+模型文件中保存了分类器、类别名、训练特征、归一化参数、验证准确率、混淆矩阵、数据集路径和特征说明等信息。测试脚本会加载该文件，并对测试目录下的 PNG 图片逐张输出预测类别。
+
+## 训练
+
+在 MATLAB 中进入项目根目录后运行：
+
+```matlab
+train
+```
+
+也可以手动指定训练数据目录和模型输出路径：
+
+```matlab
+train('-data', 'data/Hand_Posture_Easy_Stu', '-out', 'models/gesture_model.mat')
+```
+
+训练过程会在命令行输出训练图片数量、平均交叉验证准确率、混淆矩阵以及模型保存路径。
+
+## 测试
+
+使用默认配置测试：
+
+```matlab
+test
+```
+
+也可以指定测试目录和模型文件：
+
+```matlab
+test('-test', 'data/Hand_Posture_Easy_Stu', '-model', 'models/gesture_model.mat')
+```
+
+测试脚本会递归读取测试目录中的 PNG 图片，并输出类似结果：
+
+```text
+A/img001.png: A
+C/img001.png: C
+Five/img001.png: Five
+V/img001.png: V
+```
+
+## 实验结果
+
+当前实验数据集共 200 张图片，每类 50 张。使用 5 次重复 10 折交叉验证后，平均验证准确率为：
 
 ```text
 93.80%
 ```
 
-混淆矩阵如下：
+第一轮验证得到的混淆矩阵如下：
 
-| 真实 \ 预测 | A | C | Five | V |
+| 真实类别 \ 预测类别 | A | C | Five | V |
 | --- | ---: | ---: | ---: | ---: |
 | A | 46 | 4 | 0 | 0 |
 | C | 3 | 46 | 0 | 1 |
 | Five | 2 | 0 | 48 | 0 |
 | V | 1 | 0 | 0 | 49 |
 
-## 说明
-
-- 根目录下不再保留 `train.m`、`test.m`、`startup_check.m`，统一使用 `scripts/` 目录下的入口脚本。
-- 如果你只想直接测试现成模型，运行 `scripts/evaluate.m` 即可。
-- 如果你修改了特征提取或分类参数，建议先运行 `scripts/train.m` 重新生成模型。
-## MATLAB command usage
-
-The current entry files are in the project root. Open MATLAB in the project root before calling them:
-
-```matlab
-cd('C:/path/to/project')
-```
-
-Default paths are centralized in `configs/default.yaml`. If you change the paths there, `train` and `test` will automatically use the new defaults on next run.
-
-Train with default paths:
-
-```matlab
-train
-```
-
-Train with custom input and output paths:
-
-```matlab
-train('-data', 'C:/path/to/train_data', '-out', 'C:/path/to/gesture_model.mat')
-```
-
-Test with default paths:
-
-```matlab
-test
-```
-
-Test with custom image and model paths:
-
-```matlab
-test('-test', 'C:/path/to/test_images', '-model', 'C:/path/to/gesture_model.mat')
-```
+结果显示，`Five` 和 `V` 的识别效果较好；`A` 与 `C` 之间存在一定混淆，主要原因可能是两类手势在部分样本中的轮廓和弯曲形态较接近。
