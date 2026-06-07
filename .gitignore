@@ -41,6 +41,7 @@ __pycache__/
 .pytest_cache/
 
 data/
+docs/
 
 # Keep assignment assets that are required to run or review the project.
 !gesture_model.mat
